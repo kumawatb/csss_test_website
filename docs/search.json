@@ -7,6 +7,27 @@
     "text": "Hi, this is the website of Bhaskar Kumawat."
   },
   {
+    "objectID": "fun.html",
+    "href": "fun.html",
+    "title": "Fun Stuff",
+    "section": "",
+    "text": "This page will contain fun stuff."
+  },
+  {
+    "objectID": "fun.html#math-formulae",
+    "href": "fun.html#math-formulae",
+    "title": "Fun Stuff",
+    "section": "Math Formulae",
+    "text": "Math Formulae\n\\[\nS = -\\sum _i p_i \\ln p_i\n\\]"
+  },
+  {
+    "objectID": "fun.html#static-code",
+    "href": "fun.html#static-code",
+    "title": "Fun Stuff",
+    "section": "Static code:",
+    "text": "Static code:\n\nPython\n\n\nCode\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nr = np.arange(0, 2, 0.01)\ntheta = 2 * np.pi * r\nfig, ax = plt.subplots(\n  subplot_kw = {'projection': 'polar'} \n)\nax.plot(theta, r)\nax.set_rticks([0.5, 1, 1.5, 2])\nax.grid(True)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A line plot on a polar axis"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
@@ -14,10 +35,17 @@
     "text": "About this site"
   },
   {
-    "objectID": "fun.html",
-    "href": "fun.html",
-    "title": "Fun Stuff",
+    "objectID": "generate_grid_data.html",
+    "href": "generate_grid_data.html",
+    "title": "Generate Power-Grid data",
     "section": "",
-    "text": "This page will contain fun stuff."
+    "text": "Step 1: Sample random points within city boundaries and export the node data (id, type, lat, long).\n\n## Import shapefile and plot\nimport geopandas as gp\nimport matplotlib.pyplot as plt\nnyc_limits = gp.read_file(\"nyc_shapefiles/geo_export_63f58815-fd23-40a8-8d30-fd6212e5e404.shp\")\nfig, ax = plt.subplots(figsize = (6,6))\nnyc_limits.plot(ax=ax, color='lightgrey')\n\n\n\n\n\n\n\n\n\n## Sample substations points\nnum_substations = [40,40,40,40,40]\nsubstations = nyc_limits.sample_points(num_substations)\n\n## Plot points on map\nax = substations.plot(color=\"k\",zorder=2,markersize=3)\nnyc_limits.to_crs(epsg=4326).plot(ax=ax, color='lightgrey',zorder=1)\n\n\n\n\n\n\n\n\n\n## Clean up and export data\nsubstations_xy = substations.explode(ignore_index=True).get_coordinates()\nsubstation_tbl = substations_xy.rename(columns = {'x':'long', 'y':'lat'})\nsubstation_tbl['node_id'] = substation_tbl.index\nsubstation_tbl['type'] = \"power\"\n\nsubstation_tbl = substation_tbl[['node_id','type','lat','long']]\nsubstation_tbl\n\nsubstation_tbl.to_csv(\"generated_nodes.csv\")\n\nStep 2: Connect nodes based on some algorithm to form a network (closer nodes more likely to be connected), and export the adjacency matrix.\n\nfrom libpysal import weights, examples\nimport networkx as nx\nimport numpy as np\n\ncoordinates = np.column_stack((substations_xy['x'], substations_xy['y']))\ndist = weights.Relative_Neighborhood(coordinates)\ndist_graph = dist.to_networkx()\n\nadj_matrix = nx.to_pandas_adjacency(dist_graph)\nadj_matrix.to_csv(\"generated_adjmat.csv\",index=False)\n\n/tmp/ipykernel_1200535/1663611145.py:6: UserWarning: The numba package is used extensively in this module to accelerate the computation of graphs. Without numba, these computations may become unduly slow on large data.\n  dist = weights.Relative_Neighborhood(coordinates)\n\n\nStep 3: Create a visualization of network and export plot.\n\npositions = dict(zip(dist_graph.nodes, coordinates))\n\nf, ax = plt.subplots(figsize=(8, 8))\nnx.draw(dist_graph, positions, ax=ax, node_size=5, node_color=\"r\")\nnyc_limits.to_crs(epsg=4326).plot(ax=ax, color='lightgrey',zorder=0)\nplt.show()\nf.savefig(\"generated_network.pdf\")\n\n\n\n\n\n\n\n\nStep 4: Verify stored data\n\n## Verify data integrity by reimporting and plotting the network\n\nimport pandas as pd\nsaved_adjmat = np.genfromtxt('generated_adjmat.csv', delimiter=',')\nsaved_adjmat = saved_adjmat[1:,]\n\nsaved_positions = pd.read_csv(\"generated_nodes.csv\")\npos = np.column_stack((saved_positions['long'],saved_positions['lat']))\n\n\nrows, cols = np.where(saved_adjmat == 1)\nedges = zip(rows.tolist(), cols.tolist())\ngr = nx.Graph()\ngr.add_edges_from(edges)\nnx.draw(gr, pos=pos, node_size=2,node_color=\"r\")\nplt.show()"
+  },
+  {
+    "objectID": "generate_grid_data.html#generate-power-grid-data",
+    "href": "generate_grid_data.html#generate-power-grid-data",
+    "title": "Generate Power-Grid data",
+    "section": "",
+    "text": "Step 1: Sample random points within city boundaries and export the node data (id, type, lat, long).\n\n## Import shapefile and plot\nimport geopandas as gp\nimport matplotlib.pyplot as plt\nnyc_limits = gp.read_file(\"nyc_shapefiles/geo_export_63f58815-fd23-40a8-8d30-fd6212e5e404.shp\")\nfig, ax = plt.subplots(figsize = (6,6))\nnyc_limits.plot(ax=ax, color='lightgrey')\n\n\n\n\n\n\n\n\n\n## Sample substations points\nnum_substations = [40,40,40,40,40]\nsubstations = nyc_limits.sample_points(num_substations)\n\n## Plot points on map\nax = substations.plot(color=\"k\",zorder=2,markersize=3)\nnyc_limits.to_crs(epsg=4326).plot(ax=ax, color='lightgrey',zorder=1)\n\n\n\n\n\n\n\n\n\n## Clean up and export data\nsubstations_xy = substations.explode(ignore_index=True).get_coordinates()\nsubstation_tbl = substations_xy.rename(columns = {'x':'long', 'y':'lat'})\nsubstation_tbl['node_id'] = substation_tbl.index\nsubstation_tbl['type'] = \"power\"\n\nsubstation_tbl = substation_tbl[['node_id','type','lat','long']]\nsubstation_tbl\n\nsubstation_tbl.to_csv(\"generated_nodes.csv\")\n\nStep 2: Connect nodes based on some algorithm to form a network (closer nodes more likely to be connected), and export the adjacency matrix.\n\nfrom libpysal import weights, examples\nimport networkx as nx\nimport numpy as np\n\ncoordinates = np.column_stack((substations_xy['x'], substations_xy['y']))\ndist = weights.Relative_Neighborhood(coordinates)\ndist_graph = dist.to_networkx()\n\nadj_matrix = nx.to_pandas_adjacency(dist_graph)\nadj_matrix.to_csv(\"generated_adjmat.csv\",index=False)\n\n/tmp/ipykernel_1200535/1663611145.py:6: UserWarning: The numba package is used extensively in this module to accelerate the computation of graphs. Without numba, these computations may become unduly slow on large data.\n  dist = weights.Relative_Neighborhood(coordinates)\n\n\nStep 3: Create a visualization of network and export plot.\n\npositions = dict(zip(dist_graph.nodes, coordinates))\n\nf, ax = plt.subplots(figsize=(8, 8))\nnx.draw(dist_graph, positions, ax=ax, node_size=5, node_color=\"r\")\nnyc_limits.to_crs(epsg=4326).plot(ax=ax, color='lightgrey',zorder=0)\nplt.show()\nf.savefig(\"generated_network.pdf\")\n\n\n\n\n\n\n\n\nStep 4: Verify stored data\n\n## Verify data integrity by reimporting and plotting the network\n\nimport pandas as pd\nsaved_adjmat = np.genfromtxt('generated_adjmat.csv', delimiter=',')\nsaved_adjmat = saved_adjmat[1:,]\n\nsaved_positions = pd.read_csv(\"generated_nodes.csv\")\npos = np.column_stack((saved_positions['long'],saved_positions['lat']))\n\n\nrows, cols = np.where(saved_adjmat == 1)\nedges = zip(rows.tolist(), cols.tolist())\ngr = nx.Graph()\ngr.add_edges_from(edges)\nnx.draw(gr, pos=pos, node_size=2,node_color=\"r\")\nplt.show()"
   }
 ]

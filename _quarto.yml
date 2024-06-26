@@ -10,6 +10,7 @@ website:
         text: Home
       - about.qmd
       - fun.qmd
+      - generate_grid_data.ipynb
 
 format:
   html:
