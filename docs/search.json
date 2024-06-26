@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Home",
+    "section": "",
+    "text": "Hi, this is the website of Bhaskar Kumawat."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "fun.html",
+    "href": "fun.html",
+    "title": "Fun Stuff",
+    "section": "",
+    "text": "This page will contain fun stuff."
+  }
+]
